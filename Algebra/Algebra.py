@@ -316,10 +316,10 @@ class Variable:
                     "f": u"\u1da0", "g": u"\u1d4d", "h": u"\u02b0", "i": u"\u2071", "j": u"\u02B2",
                     "k": u"\u1d4f", "l": u"\u02e1"}
 
-    __builtin_names = ["e", "ln"
+    __builtin_names = ["e", "ln",
                        # Trigonometric
                        "sin", "cos", "tan",
-                       "arcsin", "arcos", "arctan",
+                       "arcsin", "arccos", "arctan",
                        # Hyperbolic
                        "sinh", "cosh", "tanh",
                        "arsinh", "arcosh", "artanh"
@@ -965,7 +965,7 @@ class cos(CustomF):
         """
         Class string method.
 
-        :return: The raw string for the function sin().
+        :return: The raw string for the function cos().
         """
         return self.name + "(" + str(self.x) + ")"
 
@@ -986,3 +986,168 @@ class cos(CustomF):
                 equality = True
 
         return equality
+
+
+class tan(CustomF):
+    """
+    Built in representation of the algebraic construction of the tangent function.
+    """
+
+    def __init__(self, x):
+        """
+        Class constructor method for the tangent function
+        """
+
+        self.name = "tan"
+        self.x = x
+        super().__init__(self.name)
+
+    def __str__(self):
+        """
+        Class string method.
+
+        :return: The raw string for the function tan().
+        """
+        return self.name + "(" + str(self.x) + ")"
+
+    def __eq__(self, other):
+        """
+        Evaluates the value of the equality.
+
+        :param other: The object being compared to this.
+        :return: The result of the equality.
+        :rtype: bool
+        """
+
+        equality = False
+
+        if type(other) is tan:
+
+            if other.x == self.x:
+                equality = True
+
+        return equality
+
+
+class arcsin(CustomF):
+    """
+    Built in representation of the algebraic construction of the arcsine function.
+    """
+
+    def __init__(self, x):
+        """
+        Class constructor method for the cosine function
+        """
+
+        self.name = "arcsin"
+        self.x = x
+        super().__init__(self.name)
+
+    def __str__(self):
+        """
+        Class string method.
+
+        :return: The raw string for the function arcsin().
+        """
+        return self.name + "(" + str(self.x) + ")"
+
+    def __eq__(self, other):
+        """
+        Evaluates the value of the equality.
+
+        :param other: The object being compared to this.
+        :return: The result of the equality.
+        :rtype: bool
+        """
+
+        equality = False
+
+        if type(other) is arcsin:
+
+            if other.x == self.x:
+                equality = True
+
+        return equality
+
+
+class arccos(CustomF):
+    """
+    Built in representation of the algebraic construction of the arccosine function.
+    """
+
+    def __init__(self, x):
+        """
+        Class constructor method for the arccosine function
+        """
+
+        self.name = "arccos"
+        self.x = x
+        super().__init__(self.name)
+
+    def __str__(self):
+        """
+        Class string method.
+
+        :return: The raw string for the function arccos().
+        """
+        return self.name + "(" + str(self.x) + ")"
+
+    def __eq__(self, other):
+        """
+        Evaluates the value of the equality.
+
+        :param other: The object being compared to this.
+        :return: The result of the equality.
+        :rtype: bool
+        """
+
+        equality = False
+
+        if type(other) is arccos:
+
+            if other.x == self.x:
+                equality = True
+
+        return equality
+
+
+class arctan(CustomF):
+    """
+    Built in representation of the algebraic construction of the arctangent function.
+    """
+
+    def __init__(self, x):
+        """
+        Class constructor method for the arctangent function
+        """
+
+        self.name = "cos"
+        self.x = x
+        super().__init__(self.name)
+
+    def __str__(self):
+        """
+        Class string method.
+
+        :return: The raw string for the function arctan().
+        """
+        return self.name + "(" + str(self.x) + ")"
+
+    def __eq__(self, other):
+        """
+        Evaluates the value of the equality.
+
+        :param other: The object being compared to this.
+        :return: The result of the equality.
+        :rtype: bool
+        """
+
+        equality = False
+
+        if type(other) is arctan:
+
+            if other.x == self.x:
+                equality = True
+
+        return equality
+
