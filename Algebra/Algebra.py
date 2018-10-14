@@ -297,6 +297,10 @@ class Number:
 
             return Number(new_real, new_imag)
 
+    def value(self):
+
+        return complex(self)
+
     __rmul__ = __mul__
     __radd__ = __add__
     __rsub__ = __sub__
@@ -383,7 +387,7 @@ class Variable:
             raw = str(other) + self.name
             data = {"multiple": other,
                     "variables": [self],
-                    "power": [Decimal("1")]}
+                    "power": [Number(1)]}
 
             construct = {"raw": raw,
                          "data": data}
@@ -398,7 +402,7 @@ class Variable:
                 raw = self.name + "^(2)"
                 data = {"multiple": Number(1),
                         "variables": [self],
-                        "power": [Decimal("2")]}
+                        "power": [Number(1)]}
 
                 construct = {"raw": raw,
                              "data": data}
@@ -422,7 +426,7 @@ class Variable:
             if self in other.construct["data"]["variables"]:
 
                 index = other.construct["data"]["variables"].index(self)
-                new_power = other.construct["data"]["power"][index] + Decimal("1")
+                new_power = other.construct["data"]["power"][index] + Number(1)
                 other.construct["data"]["power"][index] = new_power
 
                 construct = {"raw": Expression.raw_construct(other.construct["data"]),
@@ -455,7 +459,7 @@ class Variable:
 
         if type(other) is Number:
             raw = str(other) + self.name
-            data = {"multiple": Decimal("1") / other,
+            data = {"multiple": Number(1) / other,
                     "variables": [self],
                     "power": [Number(1)]}
 
@@ -543,6 +547,30 @@ class Variable:
                          "data": data}
 
             return Expression(construct)
+
+    def set_value(self, value):
+        """
+        Set the value of the variable
+
+        :param value: The new value of the instance.
+        """
+
+        if (type(value) is Decimal) or (type(value) is int) or (type(value) is float) or type(value) is complex:
+
+            self.set_value(Number(value))
+
+        elif type(value) is Number:
+
+            self.numeric_value = value
+
+    def value(self):
+        """
+        Gets the numerical value of the variable
+
+        :return: The value of the variable
+        """
+
+        return self.numeric_value
 
     __rmul__ = __mul__
 
@@ -672,7 +700,7 @@ class Expression:
                 new_variables = self.construct["data"]["variables"]
 
                 index = self.construct["data"]["variables"].index(other)
-                new_power = self.construct["data"]["power"][index] + Decimal(1)
+                new_power = self.construct["data"]["power"][index] + Number(1)
 
                 new_data = {"multiple": new_multiple,
                             "variables": new_variables,
@@ -688,7 +716,7 @@ class Expression:
                 new_power = self.construct["data"]["power"]
 
                 new_variables.append(other)
-                new_power.append(Decimal(1))
+                new_power.append(Number(1))
 
                 new_data = {"multiple": new_multiple,
                             "variables": new_variables,
@@ -787,7 +815,7 @@ class Expression:
 
                 new_multiple = self.construct["data"]["multiple"]
                 new_variables = self.construct["data"]["variables"].append(other)
-                new_power = self.construct["data"]["power"].append(Decimal(-1))
+                new_power = self.construct["data"]["power"].append(Number(1))
 
                 data = {"multiple": new_multiple,
                         "variables": new_variables,
@@ -846,6 +874,45 @@ class Expression:
 
         if type(power) is Variable:
             pass
+
+    def value(self):
+        """
+        Finds the value of the Expression.
+
+        :return: The value of the expression
+        :rtype: Expression
+        """
+
+        new_multiple = self.construct["data"]["multiple"]
+        new_variables = []
+        new_power = []
+
+        to_ignore = []
+
+        for i in range(0, len(self.construct["data"]["variables"])):
+
+            var_value = self.construct["data"]["variables"][i].value()
+            pow_value = self.construct["data"]["power"][i].value()
+
+            if (var_value is not None) and (pow_value is not None):
+
+                new_multiple *= (var_value ** pow_value)
+                to_ignore.append(i)
+
+        for j in range(0, len(self.construct["data"]["variables"])):
+
+            if j not in to_ignore:
+                new_variables.append(self.construct["data"]["variables"][j])
+                new_power.append(self.construct["data"]["power"][j])
+
+        new_data = {"multiple": new_multiple,
+                    "variables": new_variables,
+                    "power": new_power}
+
+        construct = {"raw": Expression.raw_construct(new_data),
+                     "data": new_data}
+
+        return Expression(construct)
 
     __rmul__ = __mul__
 
