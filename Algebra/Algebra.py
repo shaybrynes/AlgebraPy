@@ -320,6 +320,8 @@ class Variable:
                        # Trigonometric
                        "sin", "cos", "tan",
                        "arcsin", "arccos", "arctan",
+                       "cosec", "sec", "cot",
+                       "arccsc", "arcsec", "arccot",
                        # Hyperbolic
                        "sinh", "cosh", "tanh",
                        "arsinh", "arcosh", "artanh"
@@ -1029,6 +1031,123 @@ class tan(CustomF):
         return equality
 
 
+class cosec(CustomF):
+    """
+    Built in representation of the algebraic construction of the cosecant function.
+    """
+
+    def __init__(self, x):
+        """
+        Class constructor method for the cosec function.
+        """
+        self.name = "cosec"
+        self.x = x
+        super().__init__(self.name)
+
+    def __str__(self):
+        """
+        Class string method.
+
+        :return: The raw string for the function cosec().
+        """
+        return self.name + "(" + str(self.x) + ")"
+
+    def __eq__(self, other):
+        """
+        Evaluates the value of the equality.
+
+        :param other: The object being compared to this.
+        :return: The result of the equality.
+        :rtype: bool
+        """
+        equality = False
+
+        if type(other) is cosec:
+
+            if other.x == self.x:
+                equality = True
+
+        return equality
+
+
+class sec(CustomF):
+    """
+    Built in representation of the algebraic construction of the secant function.
+    """
+
+    def __init__(self, x):
+        """
+        Class constructor method for the sec function.
+        """
+        self.name = "sec"
+        self.x = x
+        super().__init__(self.name)
+
+    def __str__(self):
+        """
+        Class string method.
+
+        :return: The raw string for the function sec().
+        """
+        return self.name + "(" + str(self.x) + ")"
+
+    def __eq__(self, other):
+        """
+        Evaluates the value of the equality.
+
+        :param other: The object being compared to this.
+        :return: The result of the equality.
+        :rtype: bool
+        """
+        equality = False
+
+        if type(other) is sec:
+
+            if other.x == self.x:
+                equality = True
+
+        return equality
+
+
+class cot(CustomF):
+    """
+    Built in representation of the algebraic construction of the cotangent function.
+    """
+
+    def __init__(self, x):
+        """
+        Class constructor method for the cot function.
+        """
+        self.name = "cot"
+        self.x = x
+        super().__init__(self.name)
+
+    def __str__(self):
+        """
+        Class string method.
+
+        :return: The raw string for the function sec().
+        """
+        return self.name + "(" + str(self.x) + ")"
+
+    def __eq__(self, other):
+        """
+        Evaluates the value of the equality.
+
+        :param other: The object being compared to this.
+        :return: The result of the equality.
+        :rtype: bool
+        """
+        equality = False
+
+        if type(other) is sec:
+
+            if other.x == self.x:
+                equality = True
+
+        return equality
+
+
 class arcsin(CustomF):
     """
     Built in representation of the algebraic construction of the arcsine function.
@@ -1036,7 +1155,7 @@ class arcsin(CustomF):
 
     def __init__(self, x):
         """
-        Class constructor method for the cosine function
+        Class constructor method for the arcsin function
         """
 
         self.name = "arcsin"
@@ -1121,7 +1240,7 @@ class arctan(CustomF):
         Class constructor method for the arctangent function
         """
 
-        self.name = "cos"
+        self.name = "arctan"
         self.x = x
         super().__init__(self.name)
 
@@ -1151,3 +1270,125 @@ class arctan(CustomF):
 
         return equality
 
+
+class arccsc(CustomF):
+    """
+    Built in representation of the algebraic construction of the arccosecant function.
+    """
+
+    def __init__(self, x):
+        """
+        Class constructor method for the arccosecant function
+        """
+
+        self.name = "arccsc"
+        self.x = x
+        super().__init__(self.name)
+
+    def __str__(self):
+        """
+        Class string method.
+
+        :return: The raw string for the function arccsc().
+        """
+        return self.name + "(" + str(self.x) + ")"
+
+    def __eq__(self, other):
+        """
+        Evaluates the value of the equality.
+
+        :param other: The object being compared to this.
+        :return: The result of the equality.
+        :rtype: bool
+        """
+
+        equality = False
+
+        if type(other) is arccsc:
+
+            if other.x == self.x:
+                equality = True
+
+        return equality
+
+
+class arcsec(CustomF):
+    """
+    Built in representation of the algebraic construction of the arcsecant function.
+    """
+
+    def __init__(self, x):
+        """
+        Class constructor method for the arcsecant function
+        """
+
+        self.name = "arcsec"
+        self.x = x
+        super().__init__(self.name)
+
+    def __str__(self):
+        """
+        Class string method.
+
+        :return: The raw string for the function arcsec().
+        """
+        return self.name + "(" + str(self.x) + ")"
+
+    def __eq__(self, other):
+        """
+        Evaluates the value of the equality.
+
+        :param other: The object being compared to this.
+        :return: The result of the equality.
+        :rtype: bool
+        """
+
+        equality = False
+
+        if type(other) is arcsec:
+
+            if other.x == self.x:
+                equality = True
+
+        return equality
+
+
+class arccot(CustomF):
+        """
+        Built in representation of the algebraic construction of the arccotangent function.
+        """
+
+        def __init__(self, x):
+            """
+            Class constructor method for the arccotangent function
+            """
+
+            self.name = "arccot"
+            self.x = x
+            super().__init__(self.name)
+
+        def __str__(self):
+            """
+            Class string method.
+
+            :return: The raw string for the function arccot().
+            """
+            return self.name + "(" + str(self.x) + ")"
+
+        def __eq__(self, other):
+            """
+            Evaluates the value of the equality.
+
+            :param other: The object being compared to this.
+            :return: The result of the equality.
+            :rtype: bool
+            """
+
+            equality = False
+
+            if type(other) is arccot:
+
+                if other.x == self.x:
+                    equality = True
+
+            return equality
