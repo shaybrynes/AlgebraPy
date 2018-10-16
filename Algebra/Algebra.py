@@ -251,10 +251,21 @@ class Number:
             return Number(complex(self) ** complex(power))
 
         if type(power) is Variable:
-            raw = str(self) + "^(" + str(power) + ")"
             data = {"multiple": Number(1),
                     "variables": [self],
                     "power": [power]}
+            raw = Expression.raw_construct(data)
+
+            construct = {"raw": raw,
+                         "data": data}
+
+            return Expression(construct)
+
+        if type(power) is Expression:
+            data = {"multiple": Number(1),
+                    "variables": [self],
+                    "power": [power]}
+            raw = Expression.raw_construct(data)
 
             construct = {"raw": raw,
                          "data": data}
@@ -287,7 +298,7 @@ class Number:
         """
 
         # If other is a built in numerical type
-        if (type(other) is Decimal) or (type(other) is int) or (type(other) is float):
+        if (type(other) is Decimal) or (type(other) is int) or (type(other) is float) or (type(other) is complex):
             return self - Number(other)
 
         # If other is a custom numerical class Number or a builtin complex.
@@ -299,7 +310,20 @@ class Number:
 
     def value(self):
 
-        return complex(self)
+        return self
+
+    def is_real(self):
+        """
+        Evaluates if the number is real.
+        :return: The realty of the number
+        :rtype: bool
+        """
+        realty = False
+
+        if self.imag == 0:
+            realty = True
+
+        return realty
 
     __rmul__ = __mul__
     __radd__ = __add__
@@ -382,7 +406,7 @@ class Variable:
         :rtype: Expression
         """
 
-        if (type(other) is Decimal) or (type(other) is int) or (type(other) is float):
+        if (type(other) is Decimal) or (type(other) is int) or (type(other) is float) or (type(other) is complex):
             return self * Number(other)
 
         if type(other) is Number:
@@ -456,7 +480,7 @@ class Variable:
         :rtype: Expression
         """
 
-        if (type(other) is Decimal) or (type(other) is int) or (type(other) is float):
+        if (type(other) is Decimal) or (type(other) is int) or (type(other) is float) or (type(other) is complex):
             return self / Number(other)
 
         if type(other) is Number:
@@ -525,14 +549,14 @@ class Variable:
         :rtype: Expression
         """
 
-        if (type(power) is Decimal) or (type(power) is int) or (type(power) is float):
+        if (type(power) is Decimal) or (type(power) is int) or (type(power) is float) or (type(power) is complex):
             return self ** Number(power)
 
         if type(power) is Number:
-            raw = "" + self.name + "^(" + str(power) + ")"
-            data = {"multiple": 1,
+            data = {"multiple": Number(1),
                     "variables": [self],
                     "power": [power]}
+            raw = Expression.raw_construct(data)
 
             construct = {"raw": raw,
                          "data": data}
@@ -540,10 +564,21 @@ class Variable:
             return Expression(construct)
 
         if type(power) is Variable:
-            raw = self.name + "^(" + str(power) + ")"
-            data = {"multiple": 1,
+            data = {"multiple": Number(1),
                     "variables": [self],
                     "power": [power]}
+            raw = Expression.raw_construct(data)
+
+            construct = {"raw": raw,
+                         "data": data}
+
+            return Expression(construct)
+
+        if type(power) is Expression:
+            data = {"multiple": Number(1),
+                    "variables": [self],
+                    "power": [power]}
+            raw = Expression.raw_construct(data)
 
             construct = {"raw": raw,
                          "data": data}
@@ -621,7 +656,6 @@ class Expression:
         string_list = []
 
         for pair in zipped:
-
             try:
                 if pair[1] == Number(1):
                     next_string = str(pair[0])
@@ -676,7 +710,7 @@ class Expression:
         :rtype: Expression
         """
 
-        if (type(other) is Decimal) or (type(other) is int) or (type(other) is float):
+        if (type(other) is Decimal) or (type(other) is int) or (type(other) is float)or (type(other) is complex):
             return self * Number(other)
 
         if type(other) is Number:
@@ -773,7 +807,7 @@ class Expression:
         :rtype: Expression
         """
 
-        if (type(other) is Decimal) or (type(other) is int) or (type(other) is float):
+        if (type(other) is Decimal) or (type(other) is int) or (type(other) is float) or (type(other) is complex):
             return self / Number(other)
 
         if type(other) is Number:
@@ -860,14 +894,14 @@ class Expression:
         :rtype: Expression.
         """
 
-        if (type(power) is Decimal) or (type(power) is int) or (type(power) is float):
+        if (type(power) is Decimal) or (type(power) is int) or (type(power) is float) or (type(power) is complex):
             return self ** Number(power)
 
         if type(power) is Number:
-            raw = self.construct["raw"] + "^(" + str(power) + ")"
             data = {"multiple": self.construct["data"]["multiple"] ** power,
                     "variables": self.construct["data"]["variables"],
                     "power": [power * p for p in self.construct["data"]["power"]]}
+            raw = self.raw_construct(data)
 
             construct = {"raw": raw,
                          "data": data}
@@ -875,7 +909,33 @@ class Expression:
             return Expression(construct)
 
         if type(power) is Variable:
-            pass
+            data = {"multiple": Number(1),
+                    "variables": self.construct["data"]["variables"],
+                    "power": [power * p for p in self.construct["data"]["power"]]}
+
+            data["variables"].append(self.construct["data"]["multiple"])
+            data["power"].append(power)
+
+            raw = self.raw_construct(data)
+
+            construct = {"raw": raw,
+                         "data": data}
+
+            return Expression(construct)
+
+        if type(power) is Expression:
+
+
+            data = {"multiple": Number(1),
+                    "variables": self.construct["data"]["variables"],
+                    "power": [power * p for p in self.construct["data"]["power"]]}
+
+            raw = self.raw_construct(data)
+
+            construct = {"raw": raw,
+                         "data": data}
+
+            return Expression(construct)
 
     def value(self):
         """
@@ -896,9 +956,8 @@ class Expression:
             var_value = self.construct["data"]["variables"][i].value()
             pow_value = self.construct["data"]["power"][i].value()
 
-            if (var_value is not None) and (pow_value is not None):
-
-                new_multiple *= (var_value ** pow_value)
+            if (var_value is not None) or (pow_value is not None):
+                new_multiple = new_multiple * (var_value ** pow_value)
                 to_ignore.append(i)
 
         for j in range(0, len(self.construct["data"]["variables"])):
@@ -907,14 +966,19 @@ class Expression:
                 new_variables.append(self.construct["data"]["variables"][j])
                 new_power.append(self.construct["data"]["power"][j])
 
-        new_data = {"multiple": new_multiple,
-                    "variables": new_variables,
-                    "power": new_power}
+        if len(new_variables) != 0:
+            new_data = {"multiple": new_multiple,
+                        "variables": new_variables,
+                        "power": new_power}
 
-        construct = {"raw": Expression.raw_construct(new_data),
-                     "data": new_data}
+            construct = {"raw": Expression.raw_construct(new_data),
+                         "data": new_data}
 
-        return Expression(construct)
+            return Expression(construct)
+
+        else:
+
+            return new_multiple
 
     __rmul__ = __mul__
 
@@ -976,6 +1040,16 @@ class exp(CustomF):
 
         return equality
 
+    def value(self):
+        """
+        Returns the numerical value e.
+
+        :return: The value e
+        :rtype: Number
+        """
+
+        return Number(Decimal.exp(Decimal("1")), 0)
+
 
 class sin(CustomF):
     """
@@ -1014,6 +1088,43 @@ class sin(CustomF):
                 equality = True
 
         return equality
+
+    def value(self):
+        """
+        Finds the value of the sine function.
+
+        :return: The value of the sine.
+        :rtype: Expression
+        """
+
+        x_val = self.x.value()
+        if type(x_val) is Number:
+
+            if self.x.is_real():
+                getcontext().prec += 2
+
+                sin_val = Decimal("0")
+                sin_val_prev = Decimal("1")
+                n = Decimal("1")
+
+                while sin_val != sin_val_prev:
+                    sin_val_prev = sin_val
+
+                    twoNone = (Decimal("2")*n) - Decimal("1")
+                    fact = Decimal("1")
+
+                    for i in range(0, int(twoNone)):
+                        fact *= twoNone - i
+
+                    sin_val += (Decimal("-1")**(n-1)) * (x_val.real**(twoNone))/fact
+
+                    n += 1
+
+                getcontext().prec -= 2
+                return Number(sin_val)
+
+        else:
+            return sin(x_val)
 
 
 class cos(CustomF):
