@@ -251,10 +251,21 @@ class Number:
             return Number(complex(self) ** complex(power))
 
         if type(power) is Variable:
-            raw = str(self) + "^(" + str(power) + ")"
             data = {"multiple": Number(1),
                     "variables": [self],
                     "power": [power]}
+            raw = Expression.raw_construct(data)
+
+            construct = {"raw": raw,
+                         "data": data}
+
+            return Expression(construct)
+
+        if type(power) is Expression:
+            data = {"multiple": Number(1),
+                    "variables": [self],
+                    "power": [power]}
+            raw = Expression.raw_construct(data)
 
             construct = {"raw": raw,
                          "data": data}
@@ -287,7 +298,7 @@ class Number:
         """
 
         # If other is a built in numerical type
-        if (type(other) is Decimal) or (type(other) is int) or (type(other) is float):
+        if (type(other) is Decimal) or (type(other) is int) or (type(other) is float) or (type(other) is complex):
             return self - Number(other)
 
         # If other is a custom numerical class Number or a builtin complex.
@@ -299,7 +310,20 @@ class Number:
 
     def value(self):
 
-        return complex(self)
+        return self
+
+    def is_real(self):
+        """
+        Evaluates if the number is real.
+        :return: The realty of the number
+        :rtype: bool
+        """
+        realty = False
+
+        if self.imag == 0:
+            realty = True
+
+        return realty
 
     __rmul__ = __mul__
     __radd__ = __add__
@@ -320,10 +344,12 @@ class Variable:
                     "f": u"\u1da0", "g": u"\u1d4d", "h": u"\u02b0", "i": u"\u2071", "j": u"\u02B2",
                     "k": u"\u1d4f", "l": u"\u02e1"}
 
-    __builtin_names = ["e", "ln"
+    __builtin_names = ["e", "ln",
                        # Trigonometric
                        "sin", "cos", "tan",
-                       "arcsin", "arcos", "arctan",
+                       "arcsin", "arccos", "arctan",
+                       "cosec", "sec", "cot",
+                       "arccsc", "arcsec", "arccot",
                        # Hyperbolic
                        "sinh", "cosh", "tanh",
                        "arsinh", "arcosh", "artanh"
@@ -380,7 +406,7 @@ class Variable:
         :rtype: Expression
         """
 
-        if (type(other) is Decimal) or (type(other) is int) or (type(other) is float):
+        if (type(other) is Decimal) or (type(other) is int) or (type(other) is float) or (type(other) is complex):
             return self * Number(other)
 
         if type(other) is Number:
@@ -454,7 +480,7 @@ class Variable:
         :rtype: Expression
         """
 
-        if (type(other) is Decimal) or (type(other) is int) or (type(other) is float):
+        if (type(other) is Decimal) or (type(other) is int) or (type(other) is float) or (type(other) is complex):
             return self / Number(other)
 
         if type(other) is Number:
@@ -523,14 +549,14 @@ class Variable:
         :rtype: Expression
         """
 
-        if (type(power) is Decimal) or (type(power) is int) or (type(power) is float):
+        if (type(power) is Decimal) or (type(power) is int) or (type(power) is float) or (type(power) is complex):
             return self ** Number(power)
 
         if type(power) is Number:
-            raw = "" + self.name + "^(" + str(power) + ")"
-            data = {"multiple": 1,
+            data = {"multiple": Number(1),
                     "variables": [self],
                     "power": [power]}
+            raw = Expression.raw_construct(data)
 
             construct = {"raw": raw,
                          "data": data}
@@ -538,10 +564,21 @@ class Variable:
             return Expression(construct)
 
         if type(power) is Variable:
-            raw = self.name + "^(" + str(power) + ")"
-            data = {"multiple": 1,
+            data = {"multiple": Number(1),
                     "variables": [self],
                     "power": [power]}
+            raw = Expression.raw_construct(data)
+
+            construct = {"raw": raw,
+                         "data": data}
+
+            return Expression(construct)
+
+        if type(power) is Expression:
+            data = {"multiple": Number(1),
+                    "variables": [self],
+                    "power": [power]}
+            raw = Expression.raw_construct(data)
 
             construct = {"raw": raw,
                          "data": data}
@@ -619,7 +656,6 @@ class Expression:
         string_list = []
 
         for pair in zipped:
-
             try:
                 if pair[1] == Number(1):
                     next_string = str(pair[0])
@@ -674,7 +710,7 @@ class Expression:
         :rtype: Expression
         """
 
-        if (type(other) is Decimal) or (type(other) is int) or (type(other) is float):
+        if (type(other) is Decimal) or (type(other) is int) or (type(other) is float)or (type(other) is complex):
             return self * Number(other)
 
         if type(other) is Number:
@@ -771,7 +807,7 @@ class Expression:
         :rtype: Expression
         """
 
-        if (type(other) is Decimal) or (type(other) is int) or (type(other) is float):
+        if (type(other) is Decimal) or (type(other) is int) or (type(other) is float) or (type(other) is complex):
             return self / Number(other)
 
         if type(other) is Number:
@@ -858,14 +894,14 @@ class Expression:
         :rtype: Expression.
         """
 
-        if (type(power) is Decimal) or (type(power) is int) or (type(power) is float):
+        if (type(power) is Decimal) or (type(power) is int) or (type(power) is float) or (type(power) is complex):
             return self ** Number(power)
 
         if type(power) is Number:
-            raw = self.construct["raw"] + "^(" + str(power) + ")"
             data = {"multiple": self.construct["data"]["multiple"] ** power,
                     "variables": self.construct["data"]["variables"],
                     "power": [power * p for p in self.construct["data"]["power"]]}
+            raw = self.raw_construct(data)
 
             construct = {"raw": raw,
                          "data": data}
@@ -873,7 +909,33 @@ class Expression:
             return Expression(construct)
 
         if type(power) is Variable:
-            pass
+            data = {"multiple": Number(1),
+                    "variables": self.construct["data"]["variables"],
+                    "power": [power * p for p in self.construct["data"]["power"]]}
+
+            data["variables"].append(self.construct["data"]["multiple"])
+            data["power"].append(power)
+
+            raw = self.raw_construct(data)
+
+            construct = {"raw": raw,
+                         "data": data}
+
+            return Expression(construct)
+
+        if type(power) is Expression:
+
+
+            data = {"multiple": Number(1),
+                    "variables": self.construct["data"]["variables"],
+                    "power": [power * p for p in self.construct["data"]["power"]]}
+
+            raw = self.raw_construct(data)
+
+            construct = {"raw": raw,
+                         "data": data}
+
+            return Expression(construct)
 
     def value(self):
         """
@@ -895,8 +957,7 @@ class Expression:
             pow_value = self.construct["data"]["power"][i].value()
 
             if (var_value is not None) and (pow_value is not None):
-
-                new_multiple *= (var_value ** pow_value)
+                new_multiple = new_multiple * (var_value ** pow_value)
                 to_ignore.append(i)
 
         for j in range(0, len(self.construct["data"]["variables"])):
@@ -905,14 +966,19 @@ class Expression:
                 new_variables.append(self.construct["data"]["variables"][j])
                 new_power.append(self.construct["data"]["power"][j])
 
-        new_data = {"multiple": new_multiple,
-                    "variables": new_variables,
-                    "power": new_power}
+        if len(new_variables) != 0:
+            new_data = {"multiple": new_multiple,
+                        "variables": new_variables,
+                        "power": new_power}
 
-        construct = {"raw": Expression.raw_construct(new_data),
-                     "data": new_data}
+            construct = {"raw": Expression.raw_construct(new_data),
+                         "data": new_data}
 
-        return Expression(construct)
+            return Expression(construct)
+
+        else:
+
+            return new_multiple
 
     __rmul__ = __mul__
 
@@ -987,6 +1053,16 @@ class exp(CustomF):
             return Number(((exp**power.real)*cos(power.imag)).value(),
                           ((exp**power.real)*sin(power.imag)).value())
 
+    def value(self):
+        """
+        Returns the numerical value e.
+
+        :return: The value e
+        :rtype: Number
+        """
+
+        return Number(Decimal.exp(Decimal("1")), 0)
+
 
 class sin(CustomF):
     """
@@ -1026,6 +1102,43 @@ class sin(CustomF):
 
         return equality
 
+    def value(self):
+        """
+        Finds the value of the sine function.
+
+        :return: The value of the sine.
+        :rtype: Expression
+        """
+
+        x_val = self.x.value()
+        if type(x_val) is Number:
+
+            if x_val.is_real():
+                getcontext().prec += 2
+
+                sin_val = Decimal("0")
+                sin_val_prev = Decimal("1")
+                n = Decimal("0")
+
+                while sin_val != sin_val_prev:
+                    sin_val_prev = sin_val
+
+                    twoNone = (Decimal("2")*n) + Decimal("1")
+                    fact = Decimal("1")
+
+                    for i in range(0, int(twoNone)):
+                        fact *= twoNone - i
+
+                    sin_val += (Decimal("-1")**(n)) * (x_val.real**(twoNone))/fact
+
+                    n += 1
+
+                getcontext().prec -= 2
+                return Number(sin_val)
+
+        else:
+            return sin(x_val)
+
 
 class cos(CustomF):
     """
@@ -1045,7 +1158,7 @@ class cos(CustomF):
         """
         Class string method.
 
-        :return: The raw string for the function sin().
+        :return: The raw string for the function cos().
         """
         return self.name + "(" + str(self.x) + ")"
 
@@ -1066,3 +1179,444 @@ class cos(CustomF):
                 equality = True
 
         return equality
+
+    def value(self):
+        """
+        Finds the value of the cosine function.
+
+        :return: The value of the cosine.
+        :rtype: Expression
+        """
+
+        x_val = self.x.value()
+        if type(x_val) is Number:
+
+            if x_val.is_real():
+                getcontext().prec += 2
+
+                cos_val = Decimal("0")
+                cos_val_prev = Decimal("1")
+                n = Decimal("0")
+
+                while cos_val != cos_val_prev:
+                    cos_val_prev = cos_val
+
+                    twoN = (Decimal("2")*n)
+                    fact = Decimal("1")
+
+                    for i in range(0, int(twoN)):
+                        fact *= twoN - i
+
+                    cos_val += (Decimal("-1")**(n)) * (x_val.real**(twoN))/fact
+
+                    n += 1
+
+                getcontext().prec -= 2
+                return Number(cos_val)
+
+        else:
+            return sin(x_val)
+
+
+class tan(CustomF):
+    """
+    Built in representation of the algebraic construction of the tangent function.
+    """
+
+    def __init__(self, x):
+        """
+        Class constructor method for the tangent function
+        """
+
+        self.name = "tan"
+        self.x = x
+        super().__init__(self.name)
+
+    def __str__(self):
+        """
+        Class string method.
+
+        :return: The raw string for the function tan().
+        """
+        return self.name + "(" + str(self.x) + ")"
+
+    def __eq__(self, other):
+        """
+        Evaluates the value of the equality.
+
+        :param other: The object being compared to this.
+        :return: The result of the equality.
+        :rtype: bool
+        """
+
+        equality = False
+
+        if type(other) is tan:
+
+            if other.x == self.x:
+                equality = True
+
+        return equality
+
+
+class cosec(CustomF):
+    """
+    Built in representation of the algebraic construction of the cosecant function.
+    """
+
+    def __init__(self, x):
+        """
+        Class constructor method for the cosec function.
+        """
+        self.name = "cosec"
+        self.x = x
+        super().__init__(self.name)
+
+    def __str__(self):
+        """
+        Class string method.
+
+        :return: The raw string for the function cosec().
+        """
+        return self.name + "(" + str(self.x) + ")"
+
+    def __eq__(self, other):
+        """
+        Evaluates the value of the equality.
+
+        :param other: The object being compared to this.
+        :return: The result of the equality.
+        :rtype: bool
+        """
+        equality = False
+
+        if type(other) is cosec:
+
+            if other.x == self.x:
+                equality = True
+
+        return equality
+
+
+class sec(CustomF):
+    """
+    Built in representation of the algebraic construction of the secant function.
+    """
+
+    def __init__(self, x):
+        """
+        Class constructor method for the sec function.
+        """
+        self.name = "sec"
+        self.x = x
+        super().__init__(self.name)
+
+    def __str__(self):
+        """
+        Class string method.
+
+        :return: The raw string for the function sec().
+        """
+        return self.name + "(" + str(self.x) + ")"
+
+    def __eq__(self, other):
+        """
+        Evaluates the value of the equality.
+
+        :param other: The object being compared to this.
+        :return: The result of the equality.
+        :rtype: bool
+        """
+        equality = False
+
+        if type(other) is sec:
+
+            if other.x == self.x:
+                equality = True
+
+        return equality
+
+
+class cot(CustomF):
+    """
+    Built in representation of the algebraic construction of the cotangent function.
+    """
+
+    def __init__(self, x):
+        """
+        Class constructor method for the cot function.
+        """
+        self.name = "cot"
+        self.x = x
+        super().__init__(self.name)
+
+    def __str__(self):
+        """
+        Class string method.
+
+        :return: The raw string for the function sec().
+        """
+        return self.name + "(" + str(self.x) + ")"
+
+    def __eq__(self, other):
+        """
+        Evaluates the value of the equality.
+
+        :param other: The object being compared to this.
+        :return: The result of the equality.
+        :rtype: bool
+        """
+        equality = False
+
+        if type(other) is sec:
+
+            if other.x == self.x:
+                equality = True
+
+        return equality
+
+
+class arcsin(CustomF):
+    """
+    Built in representation of the algebraic construction of the arcsine function.
+    """
+
+    def __init__(self, x):
+        """
+        Class constructor method for the arcsin function
+        """
+
+        self.name = "arcsin"
+        self.x = x
+        super().__init__(self.name)
+
+    def __str__(self):
+        """
+        Class string method.
+
+        :return: The raw string for the function arcsin().
+        """
+        return self.name + "(" + str(self.x) + ")"
+
+    def __eq__(self, other):
+        """
+        Evaluates the value of the equality.
+
+        :param other: The object being compared to this.
+        :return: The result of the equality.
+        :rtype: bool
+        """
+
+        equality = False
+
+        if type(other) is arcsin:
+
+            if other.x == self.x:
+                equality = True
+
+        return equality
+
+
+class arccos(CustomF):
+    """
+    Built in representation of the algebraic construction of the arccosine function.
+    """
+
+    def __init__(self, x):
+        """
+        Class constructor method for the arccosine function
+        """
+
+        self.name = "arccos"
+        self.x = x
+        super().__init__(self.name)
+
+    def __str__(self):
+        """
+        Class string method.
+
+        :return: The raw string for the function arccos().
+        """
+        return self.name + "(" + str(self.x) + ")"
+
+    def __eq__(self, other):
+        """
+        Evaluates the value of the equality.
+
+        :param other: The object being compared to this.
+        :return: The result of the equality.
+        :rtype: bool
+        """
+
+        equality = False
+
+        if type(other) is arccos:
+
+            if other.x == self.x:
+                equality = True
+
+        return equality
+
+
+class arctan(CustomF):
+    """
+    Built in representation of the algebraic construction of the arctangent function.
+    """
+
+    def __init__(self, x):
+        """
+        Class constructor method for the arctangent function
+        """
+
+        self.name = "arctan"
+        self.x = x
+        super().__init__(self.name)
+
+    def __str__(self):
+        """
+        Class string method.
+
+        :return: The raw string for the function arctan().
+        """
+        return self.name + "(" + str(self.x) + ")"
+
+    def __eq__(self, other):
+        """
+        Evaluates the value of the equality.
+
+        :param other: The object being compared to this.
+        :return: The result of the equality.
+        :rtype: bool
+        """
+
+        equality = False
+
+        if type(other) is arctan:
+
+            if other.x == self.x:
+                equality = True
+
+        return equality
+
+
+class arccsc(CustomF):
+    """
+    Built in representation of the algebraic construction of the arccosecant function.
+    """
+
+    def __init__(self, x):
+        """
+        Class constructor method for the arccosecant function
+        """
+
+        self.name = "arccsc"
+        self.x = x
+        super().__init__(self.name)
+
+    def __str__(self):
+        """
+        Class string method.
+
+        :return: The raw string for the function arccsc().
+        """
+        return self.name + "(" + str(self.x) + ")"
+
+    def __eq__(self, other):
+        """
+        Evaluates the value of the equality.
+
+        :param other: The object being compared to this.
+        :return: The result of the equality.
+        :rtype: bool
+        """
+
+        equality = False
+
+        if type(other) is arccsc:
+
+            if other.x == self.x:
+                equality = True
+
+        return equality
+
+
+class arcsec(CustomF):
+    """
+    Built in representation of the algebraic construction of the arcsecant function.
+    """
+
+    def __init__(self, x):
+        """
+        Class constructor method for the arcsecant function
+        """
+
+        self.name = "arcsec"
+        self.x = x
+        super().__init__(self.name)
+
+    def __str__(self):
+        """
+        Class string method.
+
+        :return: The raw string for the function arcsec().
+        """
+        return self.name + "(" + str(self.x) + ")"
+
+    def __eq__(self, other):
+        """
+        Evaluates the value of the equality.
+
+        :param other: The object being compared to this.
+        :return: The result of the equality.
+        :rtype: bool
+        """
+
+        equality = False
+
+        if type(other) is arcsec:
+
+            if other.x == self.x:
+                equality = True
+
+        return equality
+
+
+class arccot(CustomF):
+        """
+        Built in representation of the algebraic construction of the arccotangent function.
+        """
+
+        def __init__(self, x):
+            """
+            Class constructor method for the arccotangent function
+            """
+
+            self.name = "arccot"
+            self.x = x
+            super().__init__(self.name)
+
+        def __str__(self):
+            """
+            Class string method.
+
+            :return: The raw string for the function arccot().
+            """
+            return self.name + "(" + str(self.x) + ")"
+
+        def __eq__(self, other):
+            """
+            Evaluates the value of the equality.
+
+            :param other: The object being compared to this.
+            :return: The result of the equality.
+            :rtype: bool
+            """
+
+            equality = False
+
+            if type(other) is arccot:
+
+                if other.x == self.x:
+                    equality = True
+
+            return equality
