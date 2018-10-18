@@ -973,6 +973,19 @@ class exp(CustomF):
             equality = True
 
         return equality
+    
+    def __pow__(self, power, modulo=None):
+        """
+        Calculate the result of e raised to the power of a Number().
+        
+        :param power: The exponent
+        :return: The result of the exponentiation
+        """
+        
+        if type(power) is Number:
+            
+            return Number(((exp**power.real)*cos(power.imag)).value(),
+                          ((exp**power.real)*sin(power.imag)).value())
 
 
 class sin(CustomF):
