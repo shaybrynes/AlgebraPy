@@ -956,7 +956,7 @@ class Expression:
             var_value = self.construct["data"]["variables"][i].value()
             pow_value = self.construct["data"]["power"][i].value()
 
-            if (var_value is not None) or (pow_value is not None):
+            if (var_value is not None) and (pow_value is not None):
                 new_multiple = new_multiple * (var_value ** pow_value)
                 to_ignore.append(i)
 
@@ -1100,23 +1100,23 @@ class sin(CustomF):
         x_val = self.x.value()
         if type(x_val) is Number:
 
-            if self.x.is_real():
+            if x_val.is_real():
                 getcontext().prec += 2
 
                 sin_val = Decimal("0")
                 sin_val_prev = Decimal("1")
-                n = Decimal("1")
+                n = Decimal("0")
 
                 while sin_val != sin_val_prev:
                     sin_val_prev = sin_val
 
-                    twoNone = (Decimal("2")*n) - Decimal("1")
+                    twoNone = (Decimal("2")*n) + Decimal("1")
                     fact = Decimal("1")
 
                     for i in range(0, int(twoNone)):
                         fact *= twoNone - i
 
-                    sin_val += (Decimal("-1")**(n-1)) * (x_val.real**(twoNone))/fact
+                    sin_val += (Decimal("-1")**(n)) * (x_val.real**(twoNone))/fact
 
                     n += 1
 
@@ -1166,6 +1166,43 @@ class cos(CustomF):
                 equality = True
 
         return equality
+
+    def value(self):
+        """
+        Finds the value of the cosine function.
+
+        :return: The value of the cosine.
+        :rtype: Expression
+        """
+
+        x_val = self.x.value()
+        if type(x_val) is Number:
+
+            if x_val.is_real():
+                getcontext().prec += 2
+
+                cos_val = Decimal("0")
+                cos_val_prev = Decimal("1")
+                n = Decimal("0")
+
+                while cos_val != cos_val_prev:
+                    cos_val_prev = cos_val
+
+                    twoN = (Decimal("2")*n)
+                    fact = Decimal("1")
+
+                    for i in range(0, int(twoN)):
+                        fact *= twoN - i
+
+                    cos_val += (Decimal("-1")**(n)) * (x_val.real**(twoN))/fact
+
+                    n += 1
+
+                getcontext().prec -= 2
+                return Number(cos_val)
+
+        else:
+            return sin(x_val)
 
 
 class tan(CustomF):
